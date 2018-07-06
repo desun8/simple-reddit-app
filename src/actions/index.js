@@ -1,11 +1,27 @@
 // @flow
-import type { SearchSubredditRequest, SearchSubredditSuccess, SearchSubredditFailure } from './actionsType';
-import SEARCH_SUBREDDIT from './actionsType';
+import type {
+  SearchSubredditRequest,
+  SearchSubredditSuccess,
+  SearchSubredditFailure,
+  SelectedSubreddit,
+  LoadSubredditPostsRequest,
+  LoadSubredditPostsSuccess,
+  LoadSubredditPostsFailure,
+  SubscribeToSubreddit,
+  UnsubscribeToSubreddit,
+} from './actionsType';
+import types from './actionsType';
 
 type Action =
   | SearchSubredditRequest
   | SearchSubredditSuccess
-  | SearchSubredditFailure;
+  | SearchSubredditFailure
+  | LoadSubredditPostsRequest
+  | LoadSubredditPostsSuccess
+  | LoadSubredditPostsFailure
+  | SubscribeToSubreddit
+  | UnsubscribeToSubreddit
+  | SelectedSubreddit;
 
 /* eslint-disable */
 // flow for thunk action
@@ -15,9 +31,9 @@ type ThunkAction = (dispatch: Dispatch, getState: GetState) => any;
 type Dispatch = (action: Action | ThunkAction | PromiseAction | Array<Action>) => any
 /* eslint-enable */
 
-// action creators for SearchSubreddit
+// Search subreddit
 export const searchSubredditRequest = (subreddit: string): SearchSubredditRequest => ({
-  type: SEARCH_SUBREDDIT.SEARCH_SUBREDDIT_REQUEST,
+  type: types.SEARCH_SUBREDDIT_REQUEST,
   subreddit,
 });
 
@@ -25,14 +41,14 @@ export const searchSubredditSuccess = (
   subreddit: string,
   json: Object,
 ): SearchSubredditSuccess => ({
-  type: SEARCH_SUBREDDIT.SEARCH_SUBREDDIT_SUCCESS,
+  type: types.SEARCH_SUBREDDIT_SUCCESS,
   result: json,
   subreddit,
 });
 
 export const searchSubredditFailure = (error: string): SearchSubredditFailure => ({
-  type: SEARCH_SUBREDDIT.SEARCH_SUBREDDIT_FAILURE,
-  message: error,
+  type: types.SEARCH_SUBREDDIT_FAILURE,
+  error,
 });
 
 const fetchSearchSubreddit = (subreddit: string): ThunkAction => (dispatch) => {
@@ -50,7 +66,7 @@ const fetchSearchSubreddit = (subreddit: string): ThunkAction => (dispatch) => {
 };
 
 const shouldFetchSearchSubreddit = (state, subreddit) => {
-  const { value } = state.searchResult;
+  const { value } = state.searchSubreddit;
 
   if (!subreddit || value.toLowerCase() === subreddit.toLowerCase()) {
     return false;
@@ -72,3 +88,65 @@ export const fetchSearchSubredditIfValid = (subreddit: string) => (
     'К сожалению поиск с такой фразой невозможен. Пожалуйста измените запрос.',
   );
 };
+
+// Load subreddit
+export const loadSubredditPostsRequest = (subreddit: string): LoadSubredditPostsRequest => ({
+  type: types.LOAD_SUBREDDIT_POSTS_REQUEST,
+  subreddit,
+});
+
+export const loadSubredditPostsSuccess = (
+  subreddit: string,
+  json: Object,
+): LoadSubredditPostsSuccess => ({
+  type: types.LOAD_SUBREDDIT_POSTS_SUCCESS,
+  items: json,
+  subreddit,
+});
+
+export const loadSubredditPostsFailure = (
+  subreddit: string,
+  error: string,
+): LoadSubredditPostsFailure => ({
+  type: types.LOAD_SUBREDDIT_POSTS_FAILURE,
+  error,
+  subreddit,
+});
+
+export const fetchLoadSubredditPosts = (subreddit: string): ThunkAction => (dispatch) => {
+  dispatch(loadSubredditPostsRequest(subreddit));
+  return fetch(`https://www.reddit.com/r/${subreddit}.json`)
+    .then((response) => {
+      if (response.status >= 400) {
+        throw new Error('Server not found.');
+      }
+
+      return response.json();
+    })
+    .then(json => dispatch(loadSubredditPostsSuccess(subreddit, json)))
+    .catch(error => dispatch(loadSubredditPostsFailure(subreddit, error)));
+};
+
+// Selected subreddit
+export const selectedSubreddit = (subreddit: string): SelectedSubreddit => ({
+  type: types.SELECTED_SUBREDDIT,
+  subreddit,
+});
+
+// My subreddits
+// Subscribe and unsubscribe
+export const subscribeToSubreddit = (
+  name: string,
+  img: string,
+  description: string,
+): SubscribeToSubreddit => ({
+  type: types.SUBSCRIBE_TO_SUBREDDIT,
+  name,
+  img,
+  description,
+});
+
+export const unsubscribeToSubreddit = (name: string): UnsubscribeToSubreddit => ({
+  type: types.UNSUBSCRIBE_TO_SUBREDDIT,
+  name,
+});

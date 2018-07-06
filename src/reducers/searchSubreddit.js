@@ -1,7 +1,7 @@
 // @flow
-import { combineReducers } from 'redux';
+
 import type { SearchSubredditRequest, SearchSubredditSuccess, SearchSubredditFailure } from '../actions/actionsType';
-import SEARCH_SUBREDDIT from '../actions/actionsType';
+import types from '../actions/actionsType';
 
 type State = {
   +isFetching: boolean,
@@ -11,8 +11,9 @@ type State = {
     +description: string,
     +title: string,
     +img: string,
-  }[] | string,
-  +error?: boolean,
+    +subscribe: boolean,
+  }[],
+  +error?: string,
 }
 
 type Action =
@@ -37,36 +38,32 @@ const result = (json: Json) => json.data.children.map(el => ({
   description: el.data.public_description,
   title: el.data.title,
   img: el.data.icon_img || defaultImg,
+  subscribe: false,
 }));
 
-const searchResult = (state: State = initialState, action: Action): State => {
+const searchSubreddit = (state: State = initialState, action: Action): State => {
   switch (action.type) {
-    case SEARCH_SUBREDDIT.SEARCH_SUBREDDIT_REQUEST:
+    case types.SEARCH_SUBREDDIT_REQUEST:
       return {
         ...state,
         isFetching: true,
         value: action.subreddit,
       };
-    case SEARCH_SUBREDDIT.SEARCH_SUBREDDIT_SUCCESS:
+    case types.SEARCH_SUBREDDIT_SUCCESS:
       return {
         ...state,
         isFetching: false,
         result: result(action.result),
       };
-    case SEARCH_SUBREDDIT.SEARCH_SUBREDDIT_FAILURE:
+    case types.SEARCH_SUBREDDIT_FAILURE:
       return {
         ...state,
         isFetching: false,
-        result: action.message,
-        error: true,
+        error: action.error,
       };
     default:
       return state;
   }
 };
 
-const reducer = combineReducers({
-  searchResult,
-});
-
-export default reducer;
+export default searchSubreddit;
