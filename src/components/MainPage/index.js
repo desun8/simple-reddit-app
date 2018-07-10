@@ -1,10 +1,11 @@
 // @flow
 import React, { Component } from 'react';
 import {
-  fetchLoadSubredditPosts,
+  addSubscribe,
+  removeSubscribe,
+  fetchGetSubredditData,
+  fetchPostsBySubreddit,
   selectedSubreddit,
-  subscribeToSubreddit,
-  unsubscribeToSubreddit,
 } from '../../actions';
 import Posts from './Posts';
 import Search from './Search';
@@ -19,6 +20,7 @@ type Props = {
     name: string,
     description: string,
     img: string,
+    subscribe: boolean,
   }[],
   mySubreddits: {
     name: string;
@@ -30,15 +32,17 @@ type Props = {
 class MainPage extends Component<Props> {
   componentDidMount = () => {
     const { selected, dispatch } = this.props;
-    dispatch(fetchLoadSubredditPosts(selected));
+    dispatch(fetchPostsBySubreddit(selected));
+    dispatch(fetchGetSubredditData(selected));
   };
 
   componentDidUpdate = (prevProps: Object) => {
-    const { selected, dispatch } = this.props;
+    const { selected, dispatch, posts } = this.props;
 
     if (selected !== prevProps.selected) {
-      if (selected !== 'mySubreddits' && selected !== '_SEARCH') {
-        dispatch(fetchLoadSubredditPosts(selected));
+      if (selected !== 'mySubreddits' && selected !== '_SEARCH' && posts[selected] === undefined) {
+        dispatch(fetchPostsBySubreddit(selected));
+        dispatch(fetchGetSubredditData(selected));
       }
     }
   };
@@ -50,7 +54,7 @@ class MainPage extends Component<Props> {
 
   handleRefresh = () => {
     const { selected, dispatch } = this.props;
-    dispatch(fetchLoadSubredditPosts(selected));
+    dispatch(fetchPostsBySubreddit(selected));
   };
 
   handleAdd = (e: any) => {
@@ -59,7 +63,7 @@ class MainPage extends Component<Props> {
       console.warn('You\'re already subscribed to this subreddit!');
     }
 
-    dispatch(subscribeToSubreddit(
+    dispatch(addSubscribe(
       e.target.dataset.name,
       e.target.dataset.img,
       e.target.dataset.description,
@@ -68,7 +72,7 @@ class MainPage extends Component<Props> {
 
   handleRemove = (e: any) => {
     const { dispatch } = this.props;
-    dispatch(unsubscribeToSubreddit(e.target.dataset.name));
+    dispatch(removeSubscribe(e.target.dataset.name));
   };
 
   render() {
@@ -86,6 +90,7 @@ class MainPage extends Component<Props> {
               handleRefresh={this.handleRefresh}
               handleClick={this.handleClick}
               handleAdd={this.handleAdd}
+              handleRemove={this.handleRemove}
             />
           )}
 
@@ -94,6 +99,7 @@ class MainPage extends Component<Props> {
               {...this.props}
               handleClick={this.handleClick}
               handleAdd={this.handleAdd}
+              handleRemove={this.handleRemove}
             />
           )}
 

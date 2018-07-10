@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import SearchSubreddit from '../components/SearchSubreddit';
 
 const mapStateToProps = state => ({
-  // subreddits: state.searchSubreddit.result,
+  result: state.mySubreddits,
   isFetching: state.searchSubreddit.isFetching,
 });
 

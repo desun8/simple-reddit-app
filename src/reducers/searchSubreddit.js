@@ -1,6 +1,12 @@
 // @flow
 
-import type { SearchSubredditRequest, SearchSubredditSuccess, SearchSubredditFailure } from '../actions/actionsType';
+import type {
+  SearchSubredditRequest,
+  SearchSubredditSuccess,
+  SearchSubredditFailure,
+  AddSubscribe,
+  RemoveSubscribe,
+} from '../actions/actionsType';
 import types from '../actions/actionsType';
 
 type State = {
@@ -19,7 +25,9 @@ type State = {
 type Action =
   | SearchSubredditRequest
   | SearchSubredditSuccess
-  | SearchSubredditFailure;
+  | SearchSubredditFailure
+  | AddSubscribe
+  | RemoveSubscribe;
 
 type Json = {
   data: Object,
@@ -41,6 +49,41 @@ const result = (json: Json) => json.data.children.map(el => ({
   subscribe: false,
 }));
 
+const isSubscribe = (res, sub) => res.map((el) => {
+  if (sub.some(e => el.name === e.name)) {
+    return {
+      ...el,
+      subscribe: true,
+    };
+  }
+
+  return { ...el };
+});
+
+// ACTION = ADD_SUBSCRIBE || REMOVE_SUBSCRIBE
+const addSubs = (res, subreddit) => res.map((el) => {
+  if (el.name === subreddit) {
+    return {
+      ...el,
+      subscribe: true,
+    };
+  }
+
+  return { ...el };
+});
+
+const removeSubs = (res, subreddit) => res.map((el) => {
+  if (el.name === subreddit) {
+    return {
+      ...el,
+      subscribe: false,
+    };
+  }
+
+  return { ...el };
+});
+
+
 const searchSubreddit = (state: State = initialState, action: Action): State => {
   switch (action.type) {
     case types.SEARCH_SUBREDDIT_REQUEST:
@@ -53,13 +96,24 @@ const searchSubreddit = (state: State = initialState, action: Action): State => 
       return {
         ...state,
         isFetching: false,
-        result: result(action.result),
+        result: isSubscribe(result(action.result), action.subs),
       };
     case types.SEARCH_SUBREDDIT_FAILURE:
       return {
         ...state,
         isFetching: false,
         error: action.error,
+      };
+
+    case types.ADD_SUBSCRIBE:
+      return {
+        ...state,
+        result: addSubs(state.result, action.name),
+      };
+    case types.REMOVE_SUBSCRIBE:
+      return {
+        ...state,
+        result: removeSubs(state.result, action.name),
       };
     default:
       return state;

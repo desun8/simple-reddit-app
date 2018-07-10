@@ -5,10 +5,11 @@ import { fetchSearchSubredditIfValid, selectedSubreddit } from '../actions';
 type Props = {
   isFetching: boolean,
   dispatch: any,
+  result: any,
 }
 
 const SearchSubreddit = (props: Props) => {
-  const { isFetching, dispatch } = props;
+  const { result, isFetching, dispatch } = props;
   let inputRef: any;
   let btnRef: any;
 
@@ -30,7 +31,7 @@ const SearchSubreddit = (props: Props) => {
           className="input-group mb-4"
           onSubmit={(e) => {
             e.preventDefault();
-            dispatch(fetchSearchSubredditIfValid(inputRef.value));
+            dispatch(fetchSearchSubredditIfValid(inputRef.value, result));
             dispatch(selectedSubreddit('_SEARCH'));
           }}
         >

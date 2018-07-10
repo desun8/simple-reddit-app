@@ -10,6 +10,7 @@ export type SearchSubredditSuccess = {
   type: 'SEARCH_SUBREDDIT_SUCCESS',
   result: Object,
   subreddit: string,
+  subs: any,
 };
 
 export type SearchSubredditFailure = {
@@ -39,12 +40,14 @@ const SELECTED_SUBREDDIT = 'SELECTED_SUBREDDIT';
 export type LoadSubredditPostsRequest = {
   type: 'LOAD_SUBREDDIT_POSTS_REQUEST',
   subreddit: string,
+  subscribe: boolean,
 }
 
 export type LoadSubredditPostsSuccess = {
   type: 'LOAD_SUBREDDIT_POSTS_SUCCESS',
   items: Object,
   subreddit: string,
+  subscribe: boolean,
 }
 
 export type LoadSubredditPostsFailure = {
@@ -63,27 +66,56 @@ const [
   'LOAD_SUBREDDIT_POSTS_FAILURE',
 ];
 
+//
+const [
+  GET_SUBREDDIT_DATA_REQUEST,
+  GET_SUBREDDIT_DATA_SUCCESS,
+] = [
+  'GET_SUBREDDIT_DATA_REQUEST',
+  'GET_SUBREDDIT_DATA_SUCCESS',
+];
+
+export type GetSubredditDataRequest = {
+  type: 'GET_SUBREDDIT_DATA_REQUEST',
+  subreddit: string,
+}
+
+export type GetSubredditDataSuccess = {
+  type: 'GET_SUBREDDIT_DATA_SUCCESS',
+  json: Object,
+  subreddit: string,
+}
+//
+
+
 // My subreddits
-export type SubscribeToSubreddit = {
-  type: 'SUBSCRIBE_TO_SUBREDDIT',
+export type AddSubscribe = {
+  type: 'ADD_SUBSCRIBE',
   name: string,
   img: string,
   description: string,
 }
 
-export type UnsubscribeToSubreddit = {
-  type: 'UNSUBSCRIBE_TO_SUBREDDIT',
+export type RemoveSubscribe = {
+  type: 'REMOVE_SUBSCRIBE',
   name: string,
 }
 
 const [
-  SUBSCRIBE_TO_SUBREDDIT,
-  UNSUBSCRIBE_TO_SUBREDDIT,
+  ADD_SUBSCRIBE,
+  REMOVE_SUBSCRIBE,
 ] = [
-  'SUBSCRIBE_TO_SUBREDDIT',
-  'UNSUBSCRIBE_TO_SUBREDDIT',
+  'ADD_SUBSCRIBE',
+  'REMOVE_SUBSCRIBE',
 ];
 
+// Check for subscribe
+export type IsSubredditSubscribe = {
+  type: 'IS_SUBREDDIT_SUBSCRIBE',
+  subreddit: string,
+};
+
+const IS_SUBREDDIT_SUBSCRIBE = 'IS_SUBREDDIT_SUBSCRIBE';
 
 export default {
   SEARCH_SUBREDDIT_REQUEST,
@@ -92,7 +124,10 @@ export default {
   LOAD_SUBREDDIT_POSTS_REQUEST,
   LOAD_SUBREDDIT_POSTS_SUCCESS,
   LOAD_SUBREDDIT_POSTS_FAILURE,
-  SUBSCRIBE_TO_SUBREDDIT,
-  UNSUBSCRIBE_TO_SUBREDDIT,
+  ADD_SUBSCRIBE,
+  REMOVE_SUBSCRIBE,
   SELECTED_SUBREDDIT,
+  IS_SUBREDDIT_SUBSCRIBE,
+  GET_SUBREDDIT_DATA_REQUEST,
+  GET_SUBREDDIT_DATA_SUCCESS,
 };

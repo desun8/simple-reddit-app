@@ -7,9 +7,11 @@ type Props = {
     name: string,
     description: string,
     img: string,
+    subscribe: boolean,
   }[],
   handleClick: any,
   handleAdd: any,
+  handleRemove: any,
 }
 
 const Search = (props: Props) => {
@@ -18,6 +20,7 @@ const Search = (props: Props) => {
     searchResult,
     handleClick,
     handleAdd,
+    handleRemove,
   } = props;
 
   return (
@@ -49,14 +52,14 @@ const Search = (props: Props) => {
                     {subreddit.name}
                   </button>
                   <button
-                    className="btn btn-success"
+                    className={subreddit.subscribe ? 'btn btn-danger' : 'btn btn-success'}
                     type="button"
                     data-name={subreddit.name}
                     data-img={subreddit.img}
                     data-description={subreddit.description}
-                    onClick={handleAdd}
+                    onClick={subreddit.subscribe ? handleRemove : handleAdd}
                   >
-                    subscribe
+                    {subreddit.subscribe ? 'unsubscribe' : 'subscribe'}
                   </button>
                 </h4>
               </div>

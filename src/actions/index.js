@@ -7,8 +7,11 @@ import type {
   LoadSubredditPostsRequest,
   LoadSubredditPostsSuccess,
   LoadSubredditPostsFailure,
-  SubscribeToSubreddit,
-  UnsubscribeToSubreddit,
+  AddSubscribe,
+  RemoveSubscribe,
+  GetSubredditDataRequest,
+  GetSubredditDataSuccess,
+  IsSubredditSubscribe,
 } from './actionsType';
 import types from './actionsType';
 
@@ -19,8 +22,11 @@ type Action =
   | LoadSubredditPostsRequest
   | LoadSubredditPostsSuccess
   | LoadSubredditPostsFailure
-  | SubscribeToSubreddit
-  | UnsubscribeToSubreddit
+  | GetSubredditDataRequest
+  | GetSubredditDataSuccess
+  | AddSubscribe
+  | RemoveSubscribe
+  | IsSubredditSubscribe
   | SelectedSubreddit;
 
 /* eslint-disable */
@@ -40,10 +46,12 @@ export const searchSubredditRequest = (subreddit: string): SearchSubredditReques
 export const searchSubredditSuccess = (
   subreddit: string,
   json: Object,
+  subs: any,
 ): SearchSubredditSuccess => ({
   type: types.SEARCH_SUBREDDIT_SUCCESS,
   result: json,
   subreddit,
+  subs,
 });
 
 export const searchSubredditFailure = (error: string): SearchSubredditFailure => ({
@@ -51,7 +59,7 @@ export const searchSubredditFailure = (error: string): SearchSubredditFailure =>
   error,
 });
 
-const fetchSearchSubreddit = (subreddit: string): ThunkAction => (dispatch) => {
+const fetchSearchSubreddit = (subreddit: string, subs: any): ThunkAction => (dispatch) => {
   dispatch(searchSubredditRequest(subreddit));
   return fetch(`https://www.reddit.com/subreddits/search.json?q=${subreddit}`)
     .then((response) => {
@@ -61,7 +69,7 @@ const fetchSearchSubreddit = (subreddit: string): ThunkAction => (dispatch) => {
 
       return response.json();
     })
-    .then(json => dispatch(searchSubredditSuccess(subreddit, json)))
+    .then(json => dispatch(searchSubredditSuccess(subreddit, json, subs)))
     .catch(error => dispatch(searchSubredditFailure(error)));
 };
 
@@ -75,12 +83,13 @@ const shouldFetchSearchSubreddit = (state, subreddit) => {
   return true;
 };
 
-export const fetchSearchSubredditIfValid = (subreddit: string) => (
+
+export const fetchSearchSubredditIfValid = (subreddit: string, subs: any) => (
   dispatch: Dispatch,
   getState: GetState,
 ) => {
   if (shouldFetchSearchSubreddit(getState(), subreddit)) {
-    return dispatch(fetchSearchSubreddit(subreddit));
+    return dispatch(fetchSearchSubreddit(subreddit, subs));
   }
 
   return console.warn(
@@ -89,19 +98,26 @@ export const fetchSearchSubredditIfValid = (subreddit: string) => (
   );
 };
 
+
 // Load subreddit
-export const loadSubredditPostsRequest = (subreddit: string): LoadSubredditPostsRequest => ({
+export const loadSubredditPostsRequest = (
+  subreddit: string,
+  subscribe: boolean,
+): LoadSubredditPostsRequest => ({
   type: types.LOAD_SUBREDDIT_POSTS_REQUEST,
   subreddit,
+  subscribe,
 });
 
 export const loadSubredditPostsSuccess = (
   subreddit: string,
   json: Object,
+  subscribe: boolean,
 ): LoadSubredditPostsSuccess => ({
   type: types.LOAD_SUBREDDIT_POSTS_SUCCESS,
   items: json,
   subreddit,
+  subscribe,
 });
 
 export const loadSubredditPostsFailure = (
@@ -113,8 +129,12 @@ export const loadSubredditPostsFailure = (
   subreddit,
 });
 
-export const fetchLoadSubredditPosts = (subreddit: string): ThunkAction => (dispatch) => {
-  dispatch(loadSubredditPostsRequest(subreddit));
+const fetchLoadSubredditPosts = (
+  subreddit: string,
+  subscribe: boolean,
+): ThunkAction => (dispatch) => {
+  dispatch(loadSubredditPostsRequest(subreddit, subscribe));
+
   return fetch(`https://www.reddit.com/r/${subreddit}.json`)
     .then((response) => {
       if (response.status >= 400) {
@@ -123,9 +143,42 @@ export const fetchLoadSubredditPosts = (subreddit: string): ThunkAction => (disp
 
       return response.json();
     })
-    .then(json => dispatch(loadSubredditPostsSuccess(subreddit, json)))
+    .then(json => dispatch(loadSubredditPostsSuccess(subreddit, json, subscribe)))
     .catch(error => dispatch(loadSubredditPostsFailure(subreddit, error)));
 };
+
+const isSubscribe = (state, subreddit) => {
+  const arr = state.mySubreddits;
+
+  return arr.some(el => el.name === subreddit);
+};
+
+export const fetchPostsBySubreddit = (subreddit: string) => (
+  dispatch: Dispatch,
+  getState: GetState,
+) => dispatch(fetchLoadSubredditPosts(subreddit, isSubscribe(getState(), subreddit)));
+
+
+// Get subreddit data
+const getSubredditDataRequest = (subreddit: string): GetSubredditDataRequest => ({
+  type: types.GET_SUBREDDIT_DATA_REQUEST,
+  subreddit,
+});
+
+const getSubredditDataSuccess = (subreddit: string, json: Object): GetSubredditDataSuccess => ({
+  type: types.GET_SUBREDDIT_DATA_SUCCESS,
+  subreddit,
+  json,
+});
+
+export const fetchGetSubredditData = (subreddit: string): ThunkAction => (dispatch) => {
+  dispatch(getSubredditDataRequest(subreddit));
+
+  return fetch(`https://www.reddit.com/subreddits/search.json?q=${subreddit}`)
+    .then(response => response.json())
+    .then(json => dispatch(getSubredditDataSuccess(subreddit, json)));
+};
+
 
 // Selected subreddit
 export const selectedSubreddit = (subreddit: string): SelectedSubreddit => ({
@@ -133,20 +186,28 @@ export const selectedSubreddit = (subreddit: string): SelectedSubreddit => ({
   subreddit,
 });
 
+
 // My subreddits
 // Subscribe and unsubscribe
-export const subscribeToSubreddit = (
+export const addSubscribe = (
   name: string,
   img: string,
   description: string,
-): SubscribeToSubreddit => ({
-  type: types.SUBSCRIBE_TO_SUBREDDIT,
+): AddSubscribe => ({
+  type: types.ADD_SUBSCRIBE,
   name,
   img,
   description,
 });
 
-export const unsubscribeToSubreddit = (name: string): UnsubscribeToSubreddit => ({
-  type: types.UNSUBSCRIBE_TO_SUBREDDIT,
+export const removeSubscribe = (name: string): RemoveSubscribe => ({
+  type: types.REMOVE_SUBSCRIBE,
   name,
+});
+
+
+// maybe remove
+export const isSubredditSubscribe = (subreddit: string): IsSubredditSubscribe => ({
+  type: types.IS_SUBREDDIT_SUBSCRIBE,
+  subreddit,
 });

@@ -1,13 +1,13 @@
 // @flow
 import type {
-  SubscribeToSubreddit,
-  UnsubscribeToSubreddit,
+  AddSubscribe,
+  RemoveSubscribe,
 } from '../actions/actionsType';
 import types from '../actions/actionsType';
 
 type Action =
-  | SubscribeToSubreddit
-  | UnsubscribeToSubreddit;
+  | AddSubscribe
+  | RemoveSubscribe;
 
 type State = {
   +name: string,
@@ -17,7 +17,7 @@ type State = {
 
 const mySubreddits = (state: State = [], action: Action): State => {
   switch (action.type) {
-    case types.SUBSCRIBE_TO_SUBREDDIT:
+    case types.ADD_SUBSCRIBE:
       if (state.some(el => el.name === action.name)) {
         return state;
       }
@@ -27,7 +27,7 @@ const mySubreddits = (state: State = [], action: Action): State => {
         img: action.img,
         description: action.description,
       }];
-    case types.UNSUBSCRIBE_TO_SUBREDDIT:
+    case types.REMOVE_SUBSCRIBE:
       return state.filter(el => el.name !== action.name);
     default:
       return state;

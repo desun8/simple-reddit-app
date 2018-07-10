@@ -7,6 +7,7 @@ type Props = {
   handleRefresh: any,
   handleClick: any,
   handleAdd: any,
+  handleRemove: any,
 }
 
 const Posts = (props: Props) => {
@@ -16,25 +17,28 @@ const Posts = (props: Props) => {
     handleRefresh,
     handleClick,
     handleAdd,
+    handleRemove,
   } = props;
 
   return (
-    <div>
+    <div className="w-100">
       <div className="w-100 mb-3">
         <h4>
           {selected}
         </h4>
-        <div className="d-flex flex-column align-items-end">
-          <button
-            className="btn btn-success"
-            type="button"
-            data-name={selected}
-            data-img={posts[selected].img}
-            data-description={posts[selected].description}
-            onClick={handleAdd}
-          >
-            subscribe
-          </button>
+        <div className="d-flex justify-content-end">
+          {selected !== 'popular' && (
+            <button
+              className={posts[selected].subscribe ? 'btn btn-danger' : 'btn btn-success'}
+              type="button"
+              data-name={selected}
+              data-img={posts[selected].img}
+              data-description={posts[selected].description}
+              onClick={posts[selected].subscribe ? handleRemove : handleAdd}
+            >
+              {posts[selected].subscribe ? 'unsubscribe' : 'subscribe'}
+            </button>
+          )}
           <button
             className="btn btn-sm btn-primary"
             type="button"
@@ -42,11 +46,19 @@ const Posts = (props: Props) => {
           >
             Refresh
           </button>
+        </div>
+        <div className="d-flex justify-content-end">
           <small>
             {`Last update: ${posts[selected].updateAt}`}
           </small>
         </div>
       </div>
+
+      {posts[selected].isFetching && (
+        <p>
+          Loading...
+        </p>
+      )}
 
       <ul className="list-group">
         {
