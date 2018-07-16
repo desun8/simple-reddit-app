@@ -44,6 +44,10 @@ class MainPage extends Component<Props> {
         dispatch(fetchPostsBySubreddit(selected));
         dispatch(fetchGetSubredditData(selected));
       }
+
+      if (posts[selected] !== undefined && posts[selected].items < 1) {
+        dispatch(fetchPostsBySubreddit(selected));
+      }
     }
   };
 

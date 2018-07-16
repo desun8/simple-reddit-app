@@ -106,6 +106,13 @@ const posts = (state: PostsState = postsInitialState, action: Action): PostsStat
         isFetching: false,
         items: postsParsing(action.items),
       };
+    case types.LOAD_SUBREDDIT_POSTS_FAILURE:
+      return {
+        ...state,
+        isFetching: false,
+        error: action.error,
+      };
+
     case types.GET_SUBREDDIT_DATA_SUCCESS:
       return {
         ...state,
