@@ -10,6 +10,9 @@
 /build
 
 # misc
+.idea
+.eslintrc.js
+.flowconfig
 .DS_Store
 .env.local
 .env.development.local
