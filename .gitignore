@@ -11,6 +11,7 @@
 
 # misc
 .idea
+._idea
 .eslintrc.js
 .flowconfig
 .DS_Store
